@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LocateNow+</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(120deg, #000000, #8b0000);
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .box {
+            background: rgba(0, 0, 0, 0.65);
+            padding: 25px;
+            border-radius: 15px;
+            width: 340px;
+            text-align: center;
+            box-shadow: 0 0 15px black;
+        }
+
+        h1 {
+            color: #ff4d4d;
+        }
+
+        button {
+            background: red;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: darkred;
+        }
+
+        p {
+            font-size: 14px;
+            margin: 6px 0;
+        }
+
+        a {
+            color: #00ffcc;
+            text-decoration: none;
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+    <h1>📍 LocateNow+</h1>
+    <p>Find your exact location details</p>
+
+    <button onclick="getLocation()">Get My Location</button>
+
+    <p><b>Latitude:</b> <span id="lat">--</span></p>
+    <p><b>Longitude:</b> <span id="lon">--</span></p>
+    <p><b>City:</b> <span id="city">--</span></p>
+    <p><b>State:</b> <span id="state">--</span></p>
+    <p><b>Country:</b> <span id="country">--</span></p>
+    <p><b>Address:</b> <span id="address">--</span></p>
+
+    <a id="mapLink" target="_blank"></a>
+</div>
+
+<script>
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, showError);
+    } else {
+        alert("Geolocation not supported");
+    }
+}
+
+function showPosition(position) {
+    let lat = position.coords.latitude;
+    let lon = position.coords.longitude;
+
+    document.getElementById("lat").innerText = lat;
+    document.getElementById("lon").innerText = lon;
+
+    let mapLink = document.getElementById("mapLink");
+    mapLink.href = "https://www.google.com/maps?q=" + lat + "," + lon;
+    mapLink.innerText = "📍 Open in Google Maps";
+
+    // Reverse Geocoding API (Free)
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("city").innerText =
+                data.address.city || data.address.town || data.address.village || "N/A";
+
+            document.getElementById("state").innerText =
+                data.address.state || "N/A";
+
+            document.getElementById("country").innerText =
+                data.address.country || "N/A";
+
+            document.getElementById("address").innerText =
+                data.display_name || "N/A";
+        })
+        .catch(() => {
+            alert("Unable to fetch address details");
+        });
+}
+
+function showError() {
+    alert("Location permission denied or unavailable");
+}
+</script>
+
+</body>
+</html>
